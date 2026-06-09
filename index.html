@@ -2,273 +2,166 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relax Place</title>
+<title>Travel Places</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
 }
 
-body{
-    background:#0f172a;
-    color:white;
+/* TOP BAR */
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #111827;
 }
 
-header{
-    padding:20px;
-    text-align:center;
-    background:#111827;
-    font-size:32px;
-    font-weight:bold;
-    letter-spacing:2px;
+input {
+    padding: 8px;
+    width: 200px;
 }
 
-.main-slider{
-    display:flex;
-    overflow-x:auto;
-    gap:20px;
-    padding:20px;
+/* LAYOUT */
+.container {
+    display: flex;
 }
 
-.card{
-    min-width:300px;
-    background:#1e293b;
-    border-radius:20px;
-    overflow:hidden;
-    cursor:pointer;
-    transition:0.3s;
+/* MAP */
+#map {
+    height: 100vh;
+    width: 40%;
 }
 
-.card:hover{
-    transform:scale(1.03);
+/* FEED */
+.feed {
+    width: 60%;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
 }
 
-.card img{
-    width:100%;
-    height:220px;
-    object-fit:cover;
+.card {
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #222;
+    padding: 20px;
 }
 
-.card-content{
-    padding:15px;
+.card img {
+    width: 80%;
+    border-radius: 10px;
 }
 
-.card-content h2{
-    margin-bottom:10px;
+/* LOGIN */
+.login {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 10px;
 }
-
-.details{
-    display:none;
-    padding:30px;
-    background:#111827;
-}
-
-.details.active{
-    display:block;
-}
-
-.details img{
-    width:100%;
-    max-height:500px;
-    object-fit:cover;
-    border-radius:20px;
-    margin-bottom:20px;
-}
-
-.info{
-    margin-top:20px;
-    line-height:1.8;
-}
-
-.reviews{
-    margin-top:30px;
-}
-
-.review{
-    background:#1e293b;
-    padding:15px;
-    border-radius:15px;
-    margin-top:10px;
-}
-
-.similar{
-    margin-top:40px;
-}
-
-.similar-list{
-    display:flex;
-    gap:15px;
-    overflow-x:auto;
-    margin-top:15px;
-}
-
-.similar-card{
-    min-width:220px;
-    background:#1e293b;
-    border-radius:15px;
-    overflow:hidden;
-}
-
-.similar-card img{
-    width:100%;
-    height:140px;
-    object-fit:cover;
-}
-
-.similar-card h4{
-    padding:10px;
-}
-
-button{
-    margin-top:20px;
-    padding:12px 25px;
-    border:none;
-    background:#2563eb;
-    color:white;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-}
-
-button:hover{
-    background:#1d4ed8;
+button {
+    padding: 8px;
+    cursor: pointer;
 }
 </style>
 </head>
+
 <body>
 
-<header>RELAX PLACE</header>
+<header>
+    <h3>Travel App</h3>
+    <input id="search" placeholder="Поиск мест...">
+    <button onclick="logout()">Выйти</button>
+</header>
 
-<!-- Главная лента -->
-<div class="main-slider">
+<div class="container">
+    <div id="map"></div>
 
-    <div class="card" onclick="openDetails(
-        'Mountain Resort',
-        'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-        'Отличное место для отдыха в горах.',
-        'ул. Горная 12',
-        '09:00 - 23:00'
-    )">
-        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb">
-        <div class="card-content">
-            <h2>Mountain Resort</h2>
-            <p>Горный отдых</p>
-        </div>
-    </div>
-
-    <div class="card" onclick="openDetails(
-        'Lake Hotel',
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-        'Красивый отель возле озера.',
-        'ул. Озерная 8',
-        '08:00 - 00:00'
-    )">
-        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e">
-        <div class="card-content">
-            <h2>Lake Hotel</h2>
-            <p>Отдых возле озера</p>
-        </div>
-    </div>
-
-    <div class="card" onclick="openDetails(
-        'Forest Camp',
-        'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-        'Тихое место среди леса.',
-        'ул. Лесная 21',
-        '10:00 - 22:00'
-    )">
-        <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
-        <div class="card-content">
-            <h2>Forest Camp</h2>
-            <p>Лесной отдых</p>
-        </div>
-    </div>
-
+    <div class="feed" id="feed"></div>
 </div>
 
-<!-- Подробности -->
-<div class="details" id="details">
-
-    <img id="detailImage" src="">
-    <h1 id="detailTitle"></h1>
-
-    <div class="info">
-        <p id="detailText"></p>
-
-        <p><strong>📍 Адрес:</strong> <span id="detailAddress"></span></p>
-
-        <p><strong>🕒 Время работы:</strong> <span id="detailTime"></span></p>
-    </div>
-
-    <!-- Отзывы -->
-    <div class="reviews">
-        <h2>Отзывы</h2>
-
-        <div class="review">
-            ⭐⭐⭐⭐⭐ Очень красивое место!
-        </div>
-
-        <div class="review">
-            ⭐⭐⭐⭐ Хороший сервис и атмосфера.
-        </div>
-
-        <div class="review">
-            ⭐⭐⭐⭐⭐ Хочу приехать снова.
-        </div>
-    </div>
-
-    <!-- Похожие -->
-    <div class="similar">
-        <h2>Похожие места</h2>
-
-        <div class="similar-list">
-
-            <div class="similar-card">
-                <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206">
-                <h4>Beach Resort</h4>
-            </div>
-
-            <div class="similar-card">
-                <img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e">
-                <h4>Green Valley</h4>
-            </div>
-
-            <div class="similar-card">
-                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
-                <h4>Nature Park</h4>
-            </div>
-
-        </div>
-    </div>
-
-    <button onclick="closeDetails()">Закрыть</button>
-
+<!-- LOGIN -->
+<div class="login" id="loginBox">
+    <h3>Вход</h3>
+    <input id="username" placeholder="Имя">
+    <button onclick="login()">Войти</button>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-function openDetails(title, image, text, address, time){
+// ---------------- USERS ----------------
+let user = localStorage.getItem("user");
 
-    document.getElementById("details").classList.add("active");
+function login() {
+    let name = document.getElementById("username").value;
+    if (!name) return;
+    localStorage.setItem("user", name);
+    location.reload();
+}
 
-    document.getElementById("detailTitle").innerText = title;
-    document.getElementById("detailImage").src = image;
-    document.getElementById("detailText").innerText = text;
-    document.getElementById("detailAddress").innerText = address;
-    document.getElementById("detailTime").innerText = time;
+function logout() {
+    localStorage.removeItem("user");
+    location.reload();
+}
 
-    window.scrollTo({
-        top: document.getElementById("details").offsetTop,
-        behavior: "smooth"
+if (user) {
+    document.getElementById("loginBox").style.display = "none";
+}
+
+// ---------------- MAP ----------------
+let map = L.map('map').setView([40.5, 72.8], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+}).addTo(map);
+
+let places = [
+    {name:"Парк", lat:40.5, lng:72.8, img:"https://picsum.photos/400/300?1"},
+    {name:"Горы", lat:40.7, lng:72.6, img:"https://picsum.photos/400/300?2"},
+    {name:"Озеро", lat:40.6, lng:72.9, img:"https://picsum.photos/400/300?3"},
+];
+
+// markers
+places.forEach(p=>{
+    L.marker([p.lat,p.lng]).addTo(map).bindPopup(p.name);
+});
+
+// ---------------- FEED ----------------
+let feed = document.getElementById("feed");
+
+function loadFeed(data){
+    feed.innerHTML = "";
+    data.forEach(p=>{
+        feed.innerHTML += `
+        <div class="card">
+            <h2>${p.name}</h2>
+            <img src="${p.img}">
+            <p>Отзывы: ${user ? "Написать отзыв..." : "Войдите чтобы писать"}</p>
+        </div>
+        `;
     });
 }
+loadFeed(places);
 
-function closeDetails(){
-    document.getElementById("details").classList.remove("active");
-}
+// ---------------- SEARCH ----------------
+document.getElementById("search").addEventListener("input", function(){
+    let val = this.value.toLowerCase();
+    let filtered = places.filter(p => p.name.toLowerCase().includes(val));
+    loadFeed(filtered);
+});
 </script>
 
 </body>
